@@ -1,7 +1,8 @@
 #include "lex.h"
 #include <stdio.h>
 #include <ctype.h>
-
+#include <string.h>
+#include <stdlib.h>
 
 char* yytext = ""; /* Lexeme (not '\0'
                       terminated)              */
@@ -58,6 +59,7 @@ int lex(void){
 			return MORE;
 		   case '=':
 			return RELEQUAL;
+		   
            case '\n':
            case '\t':
            case ' ' :
@@ -68,8 +70,29 @@ int lex(void){
             else{
                while(isalnum(*current))
                   ++current;
+              
                yyleng = current - yytext;
-               return NUM_OR_ID;
+               /*
+				* Added for if-then, and do-while and begin-end 
+				* statements
+				*/
+			   char *keyword;
+			   keyword = (char*)( malloc ( sizeof(char)*yyleng ) );
+			   strncpy( keyword, yytext, yyleng );
+			   if ( !strcmp( keyword, "if" ) )
+				return IF;
+			   if ( !strcmp( keyword, "then" ) )
+				return THEN;
+			   if ( !strcmp( keyword, "do" ) )
+				return DO;
+			   if ( !strcmp( keyword, "while" ) )
+				return WHILE;
+			   if ( !strcmp( keyword, "begin" ) )
+				return BEGIN;
+			   if ( !strcmp( keyword, "end" ) )
+				return END;
+			  
+			  return NUM_OR_ID;
             }
             break;
          }

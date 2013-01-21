@@ -20,7 +20,8 @@ char 	*relExp()
 	 * 			| expression MORE relExp
 	 * 			| expression
 	 */
-	 char *tempvar, *tempvar2;
+	 char *tempvar, *tempvar2, *tempvar3;
+	 tempvar3 = newname();
 	 tempvar = expression();
 	 while( match( RELEQUAL ) || match( LESS ) || match( MORE ) )
     {
@@ -31,33 +32,102 @@ char 	*relExp()
 		advance();
         tempvar2 = expression();
         if (flagEQUAL)
-			printf("    %s == %s\n", tempvar, tempvar2 );
+			printf("    %s = %s == %s\n", tempvar3, tempvar, tempvar2 );
         if ( flagLESS )
-			printf("    %s < %s\n", tempvar, tempvar2 );
+			printf("    %s = %s < %s\n", tempvar3, tempvar, tempvar2 );
 		if ( flagMORE )
-			printf("    %s > %s\n", tempvar, tempvar2 );
+			printf("    %s = %s > %s\n", tempvar3, tempvar, tempvar2 );
 		
         freename( tempvar2 );
+        freename( tempvar );
+        
     }
-    return tempvar;
+    return tempvar3;
+}
+constructs()
+{
+	/* constructs 	-> IF relExp THEN
+     * 				| WHILE relExp DO
+     * 				| BEGIN optStatements 
+     * BEGIN and END are used as { and } for multiline statements in
+     * THEN or DO
+     */
+    char *tempvar;
+	if ( match ( IF ) ){
+		advance();
+		tempvar = relExp();
+		if ( match ( THEN ) ){
+			advance();
+			printf("    if %s then\n", tempvar );
+		}
+		else
+			printf ( "Missing 'then' for 'if' construct\n");
+		freename (tempvar);
+	}
+	if ( match ( WHILE ) ){
+		advance();
+		tempvar = relExp();
+		if ( match ( DO ) ){
+			advance();
+			printf("    while %s do\n", tempvar );
+			if ( !match ( BEGIN ) )
+				freename ( tempvar );
+		}
+		else {
+			printf ( "Missing 'do' for 'while' construct\n");
+			freename ( tempvar );
+		}
+	}
+	if ( match ( BEGIN ) ){
+		advance();
+		printf("    begin:\n" );
+		optStatements();
+		freename ( tempvar );
+	}
+}
+
+optStatements()
+{	/* 
+	 * optStatements -> (statements | epsilon )END
+	 */
+	
+	while ( !match ( END ) ){
+		if ( match (IF) || match ( WHILE ) || match ( BEGIN ) )
+			constructs();
+		else {
+			char *tempvar = expression();
+			freename (tempvar);
+			if( match( SEMI ) )
+				advance();
+			else
+				fprintf( stderr, "%d: Inserting missing semicolon\n", yylineno );
+		}
+	}
+	printf("    end\n" );
+	advance();
 }
 
 statements()
 {
-    /*  statements -> expression SEMI  |  expression SEMI statements  */
-
+    /*  statements -> expression SEMI  |  expression SEMI statements 
+     * 				| epsilon
+     * 				| constructs statements
+     */
+	
     char *tempvar;
-
     while( !match(EOI) )
     {
-        tempvar = expression();
+		if ( match (IF) || match ( WHILE ) || match ( BEGIN ) )
+			constructs();
+		else {
+			tempvar = expression();
+			if( match( SEMI ) )
+				advance();
+			else
+				fprintf( stderr, "%d: Inserting missing semicolon\n", yylineno );
 
-        if( match( SEMI ) )
-            advance();
-        else
-            fprintf( stderr, "%d: Inserting missing semicolon\n", yylineno );
-
-        freename( tempvar );
+			freename( tempvar );
+		}
     }
 }
 

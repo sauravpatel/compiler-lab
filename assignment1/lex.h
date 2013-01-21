@@ -13,6 +13,12 @@
 #define RELEQUAL	9	/* = (relational check			*/
 #define LESS		10	/* <							*/
 #define MORE		11	/* >							*/
+#define IF			12	/* if 							*/
+#define THEN		13	/* then							*/
+#define DO			14	/* do							*/
+#define WHILE		15	/* while						*/
+#define BEGIN		16	/* begin						*/
+#define END			17	/* end							*/
 
 extern char *yytext;	/* in lex.c						*/
 extern int yyleng;
