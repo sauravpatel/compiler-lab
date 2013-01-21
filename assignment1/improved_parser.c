@@ -77,7 +77,7 @@ void    factor()
 #define MAXFIRST 16
 #define SYNCH	 SEMI
 
-int	legal_lookahead(  first_arg )
+int	legal_lookahead( first_arg )
 int	first_arg;
 {
     /* Simple error detection and recovery. Arguments are a 0-terminated list of
@@ -129,6 +129,6 @@ int	first_arg;
     }
 
 exit:
-    va_end( args )
+    va_end( args );
     return rval;
 }

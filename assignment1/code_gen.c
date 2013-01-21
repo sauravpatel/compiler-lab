@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "lex.h"
+#include <stdlib.h>
 
 char    *factor     ( void );
 char    *term       ( void );
@@ -7,6 +8,39 @@ char    *expression ( void );
 
 extern char *newname( void       );
 extern void freename( char *name );
+/*
+ * Added Boolean expressions for relational checking in if-else
+ * statements
+ */
+char 	*relExp()
+{
+	/*
+	 * relExp -> expression RELEQUAL relExp
+	 * 			| expression LESS relExp
+	 * 			| expression MORE relExp
+	 * 			| expression
+	 */
+	 char *tempvar, *tempvar2;
+	 tempvar = expression();
+	 while( match( RELEQUAL ) || match( LESS ) || match( MORE ) )
+    {
+		int flagEQUAL = match ( RELEQUAL );
+		int flagLESS = match ( LESS );
+		int flagMORE = match ( MORE );
+		
+		advance();
+        tempvar2 = expression();
+        if (flagEQUAL)
+			printf("    %s == %s\n", tempvar, tempvar2 );
+        if ( flagLESS )
+			printf("    %s < %s\n", tempvar, tempvar2 );
+		if ( flagMORE )
+			printf("    %s > %s\n", tempvar, tempvar2 );
+		
+        freename( tempvar2 );
+    }
+    return tempvar;
+}
 
 statements()
 {
@@ -31,16 +65,23 @@ char    *expression()
 {
     /* expression -> term expression'
      * expression' -> PLUS term expression' |  epsilon
+     * 				| MINUS term expression'
      */
 
     char  *tempvar, *tempvar2;
 
     tempvar = term();
-    while( match( PLUS ) )
+    
+    while( match( PLUS ) || match( MINUS ) )
     {
-        advance();
+		int flagPLUS = match ( PLUS );
+		advance();
         tempvar2 = term();
-        printf("    %s += %s\n", tempvar, tempvar2 );
+        if (flagPLUS)
+			printf("    %s += %s\n", tempvar, tempvar2 );
+        else
+			printf("    %s -= %s\n", tempvar, tempvar2 );
+		
         freename( tempvar2 );
     }
 
@@ -49,14 +90,24 @@ char    *expression()
 
 char    *term()
 {
+	/* expression -> term expression'
+     * expression' -> TIMES term expression' |  epsilon
+     * 				| DIV term expression'
+     */
+     
     char  *tempvar, *tempvar2 ;
 
     tempvar = factor();
-    while( match( TIMES ) )
+    while( match( TIMES ) || match ( DIV ) )
     {
+		int flagTIMES = match ( TIMES );
         advance();
         tempvar2 = factor();
-        printf("    %s *= %s\n", tempvar, tempvar2 );
+        if ( flagTIMES )
+			printf("    %s *= %s\n", tempvar, tempvar2 );
+        else
+        	printf("    %s /= %s\n", tempvar, tempvar2 );
+        
         freename( tempvar2 );
     }
 

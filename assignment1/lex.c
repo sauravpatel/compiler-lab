@@ -52,13 +52,19 @@ int lex(void){
             return LP;
            case ')':
             return RP;
+           case '<':
+			return LESS;
+		   case '>':
+			return MORE;
+		   case '=':
+			return RELEQUAL;
            case '\n':
            case '\t':
            case ' ' :
             break;
            default:
             if(!isalnum(*current))
-               fprintf(stderr, "Agvonse la8emevn eisagwgn <%c>\n", *current);
+               fprintf(stderr, "Invalid Symbol found: <%c>\n", *current); // Changed the printf statement
             else{
                while(isalnum(*current))
                   ++current;
