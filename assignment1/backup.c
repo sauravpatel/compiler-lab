@@ -104,29 +104,40 @@ optStatements()
 oneStmt(){
 	/*	oneStmt	->constructs
 	 * 			| expression SEMI
-	 * 			| ID_ASSIGN expression SEMI
+	 * 			| ID ASSIGN expression SEMI
 	 */
 	if ( match (IF) || match ( WHILE ) || match ( BEGIN ) )
 		constructs();
-	if ( match ( ID_ASSIGN ) ){
-		char *tempvar, *tempvar2;
-		advance();
-		tempvar = expression();
-		printf("    %s := %s\n", tempvar2 = newname(), tempvar  );
-		freename(tempvar);
-		if ( match ( SEMI ) )
-			advance();
-		else
-			fprintf( stderr, "%d: Inserting missing semicolon\n", yylineno );
-	}
 	else {
 		char *tempvar;
-		tempvar = expression();
-		freename (tempvar);
-		if( match( SEMI ) )
+		if ( match ( ID ) ){
 			advance();
-		else
-			fprintf( stderr, "%d: Inserting missing semicolon\n", yylineno );
+			if(match(ASSIGN))
+			{
+				/*
+				 * scope of identifiers unimplemented
+				 * currently scope is until program terminates
+				 */
+				advance();
+				tempvar = newname();
+				char *tempvar2 = expression();	
+				printf ( "%s := %s\n", tempvar, tempvar2);
+				freename(tempvar2);
+				if(!match(SEMI)){
+					printf("semicolon missing for assignment\n");
+				}
+				else
+				  advance();
+			}
+		}
+		else{
+			tempvar = expression();
+			freename (tempvar);
+			if( match( SEMI ) )
+				advance();
+			else
+				fprintf( stderr, "%d: Inserting missing semicolon\n", yylineno );
+		}
 	}
 }
 
@@ -144,7 +155,6 @@ statements()
 char    *expression()
 {
     /* expression -> term expression'
-     * 				| 
      * expression' -> PLUS term expression' |  epsilon
      * 				| MINUS term expression'
      */
@@ -171,11 +181,6 @@ char    *expression()
 
 char    *term()
 {
-	/*
-	 * term -> factor factor'
-	 * factor' -> TIMES factor'
-	 * 			| DIV factor'
-	 */	
     char  *tempvar, *tempvar2 ;
 
     tempvar = factor();
@@ -199,7 +204,7 @@ char    *factor()
 {
     char *tempvar;
 
-    if( match(NUM_OR_VAR) )
+    if( match(NUM) || match (ID) )
     {
 	/* Print the assignment instruction. The %0.*s conversion is a form of
 	 * %X.Ys, where X is the field width and Y is the maximum number of
@@ -209,6 +214,8 @@ char    *factor()
 	 * to print the string. The ".*" tells printf() to take the maximum-
 	 * number-of-characters count from the next argument (yyleng).
 	 */
+	//CHECK THIS TODAY!!
+		
 		printf("    %s = %0.*s\n", tempvar = newname(), yyleng, yytext );
         advance();
     }

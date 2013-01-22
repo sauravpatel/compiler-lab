@@ -59,18 +59,25 @@ int lex(void){
 			return MORE;
 		   case '=':
 			return RELEQUAL;
-		   
-           case '\n':
+		   case ':':
+		    {
+			   if ( !(*(++current) == '=') )
+					fprintf(stderr, "Invalid Symbol found: <:>\n");
+		    }
+		   case '\n':
            case '\t':
            case ' ' :
             break;
            default:
             if(!isalnum(*current))
-               fprintf(stderr, "Invalid Symbol found: <%c>\n", *current); // Changed the printf statement
-            else{
-               while(isalnum(*current))
+            	fprintf(stderr, "Invalid Symbol found: <%c>\n", *current); // Changed the printf statement
+		    else{
+			   int flagNum = 1;
+               while(isalnum(*current)){
+				 if ( !isdigit(*current) )
+					flagNum = 0;
                   ++current;
-              
+                 }
                yyleng = current - yytext;
                /*
 				* Added for if-then, and do-while and begin-end 
@@ -91,8 +98,17 @@ int lex(void){
 				return BEGIN;
 			   if ( !strcmp( keyword, "end" ) )
 				return END;
-			  
-			  return NUM_OR_ID;
+
+			   if ( !isdigit ( keyword[0] ) ){
+					while(isspace(*current))
+						++current;
+					if ( (current+1) && *(current) == ':' && *(current+1) == '=' )
+						return ID_ASSIGN;
+			   }
+			   if ( !flagNum && ( isdigit ( keyword[0] ) ) )
+				fprintf ( stderr, "Invalid ID %s. ID cannot start with number.\n", keyword );
+			   else
+				return NUM_OR_VAR;
             }
             break;
          }

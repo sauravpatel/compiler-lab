@@ -4,7 +4,7 @@
 #define TIMES		3	/* * 							*/
 #define LP			4	/* (							*/
 #define RP			5	/* )							*/
-#define NUM_OR_ID	6	/* Decimal Number or Identifier */
+//#define NUM_OR_ID	6	/* Decimal Number or Identifier */
 /*
  * Added these operations for assignment 1 on 20th January
  */
@@ -19,7 +19,9 @@
 #define WHILE		15	/* while						*/
 #define BEGIN		16	/* begin						*/
 #define END			17	/* end							*/
-
+//#define ASSIGN	18	/* := assign				*/
+#define NUM_OR_VAR	19	/* num or var(ID without := ) 	*/
+#define ID_ASSIGN	20	/* identifier					*/
 extern char *yytext;	/* in lex.c						*/
 extern int yyleng;
 extern yylineno;
