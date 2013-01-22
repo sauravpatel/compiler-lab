@@ -108,25 +108,27 @@ oneStmt(){
 	 */
 	if ( match (IF) || match ( WHILE ) || match ( BEGIN ) )
 		constructs();
-	if ( match ( ID_ASSIGN ) ){
-		char *tempvar, *tempvar2;
-		advance();
-		tempvar = expression();
-		printf("    %s := %s\n", tempvar2 = newname(), tempvar  );
-		freename(tempvar);
-		if ( match ( SEMI ) )
+	else{
+		if ( match ( ID_ASSIGN ) ){
+			char *tempvar, *tempvar2;
 			advance();
-		else
-			fprintf( stderr, "%d: Inserting missing semicolon\n", yylineno );
-	}
-	else {
-		char *tempvar;
-		tempvar = expression();
-		freename (tempvar);
-		if( match( SEMI ) )
-			advance();
-		else
-			fprintf( stderr, "%d: Inserting missing semicolon\n", yylineno );
+			tempvar = expression();
+			printf("    %s := %s\n", tempvar2 = newname(), tempvar  );
+			freename(tempvar);
+			if ( match ( SEMI ) )
+				advance();
+			else
+				fprintf( stderr, "%d: Inserting missing semicolon\n", yylineno );
+		}
+		else {
+			char *tempvar;
+			tempvar = expression();
+			freename (tempvar);
+			if( match( SEMI ) )
+				advance();
+			else
+				fprintf( stderr, "%d: Inserting missing semicolon\n", yylineno );
+			}
 	}
 }
 

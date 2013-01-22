@@ -20,6 +20,7 @@ char  *newname()
 freename(s)   
 char    *s;   
 {   
+	printf("Freeing %s\n", s);
     if( Namep > Names )   
     *--Namep = s;   
     else   
