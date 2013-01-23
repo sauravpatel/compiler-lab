@@ -72,10 +72,8 @@ constructs()
 		if ( match ( DO ) ){
 			advance();
 			printf("    while %s do\n", tempvar );
-			if ( !match ( BEGIN ) ){
-				oneStmt();
-				freename ( tempvar );
-			}
+			oneStmt();
+			freename ( tempvar );
 		}
 		else {
 			printf ( "Missing 'do' for 'while' construct\n");
@@ -86,7 +84,6 @@ constructs()
 		advance();
 		printf("    begin:\n" );
 		optStatements();
-		freename ( tempvar );
 	}
 }
 
