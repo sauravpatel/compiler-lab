@@ -143,7 +143,6 @@ statements()
 char    *expression()
 {
     /* expression -> term expression'
-     * 				| 
      * expression' -> PLUS term expression' |  epsilon
      * 				| MINUS term expression'
      */

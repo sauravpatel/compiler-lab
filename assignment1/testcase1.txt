@@ -1,0 +1,32 @@
+a:=6;
+if a<10 then
+	2+3;
+if s=3 then 
+	if a<9 then 
+		begin
+			while s<a do
+				begin
+					s:=s+1;
+				end 
+		end
+while a>4 do
+	begin 
+		m+2; 
+		if 4>6 then
+			if (2+3)>4 then
+				c:=3; m+3;
+	end
+begin
+	a+2;
+	9*0;
+	a:=5;
+	if a<3 then
+		begin
+			b+3;
+		end
+end
+if 2>9 then
+	a:=a-3;
+begin
+	a:=(((1+2)*3)/4)-5+6+7*8/9-10;
+end

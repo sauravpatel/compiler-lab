@@ -1,9 +1,0 @@
-if check<1 then s;
-if check < 2 then begin t; end
-if check < 3 then begin assign := 23; end
-if check < 4 then begin assign:=342; end
-if check < 5 then begin if check2 = 3 then begin a; b; end end
-while a = 32 do begin begin begin a; end c; d; end end
-a:=3;
-begin if a < 4 then a; end
-while a<3 do while a>4 do while m>0 do if t<9 then a;r;t;r;e;d;
