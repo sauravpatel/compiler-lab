@@ -1,3 +1,9 @@
+/* This is a lexical analyser for a given DFA.
+ * It just checks if a token is valid or invalid.
+ * Symbol table and output file generation not implemented.
+ */
+
+
 #include <iostream>
 #include <vector>
 #include <stdio.h>

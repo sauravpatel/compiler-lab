@@ -7,14 +7,17 @@
 #include <vector>
 #include <map>
 
+#include "../include/macros.h"
+
 using namespace std;
 
-void constructDfa ( char filename[1024], vector < map < char, int  > > *dfa , map < int, string > *acceptClassType);
+void constructDfa ( char DFAinput[1024], vector < map < char, int  > > *dfa , map < int, string > *acceptClassType);
 int tokenize ( char *token, vector < map < char,int > > dfa );
 int addToSymTab ( char *token, vector < string > *symbolTable);
 void constructLexeme ( char *classType, int index ,  char *lexeme );
+void createSymTabFile (  vector < string > *symbolTable );
 
-// convert integer to string
+/* convert integer to string */
 string intToStr(int num)
 {
 	stringstream ss;
@@ -27,15 +30,23 @@ int main()
 	map < int, string > validTokenType;
 	vector < map < char, int  > > dfa;
 	vector < string > symbolTable;
-	char filename[1024] = "dfainput";
+	char DFAinput[1024];
+	strcpy (DFAinput, INPUT );
+	strcat ( DFAinput , "dfainput" );
 	
 	// Reconstruct DFA
-	constructDfa ( filename, &dfa , &validTokenType);
+	constructDfa ( DFAinput, &dfa , &validTokenType);
 		
 	// Now Do Lexical Analysis
+	char inputSample[1024];
+	char outputSample[1024];
+	strcpy ( inputSample, INPUT );
+	strcat ( inputSample, "codeinput" );
+	strcpy ( outputSample, OUTPUT );
+	strcat (outputSample, "codeinput" );
 	fstream codeInput, codeOutput;
-	codeInput.open("codeinput");
-	codeOutput.open("codeOutput", fstream::out | fstream::trunc );
+	codeInput.open(inputSample);
+	codeOutput.open(outputSample, fstream::out | fstream::trunc );
 	char curInput;
 	if ( codeInput.is_open () && codeOutput.is_open() )
 	{
@@ -71,7 +82,8 @@ int main()
 		codeInput.close();
 		codeOutput.close();
 	}
-
+	// store symbol table in a file
+	createSymTabFile( &symbolTable );
 	return 0;
 }
 
@@ -106,8 +118,7 @@ int tokenize ( char *token , vector< map < char,int > > dfa)
 	return nextState;
 }
 
-/* Add token to symbol Table
- */
+/* Add token to symbol Table */
 int addToSymTab ( char *token,  vector < string > *symbolTable )
 {
 	int index = 0;
@@ -130,10 +141,10 @@ int addToSymTab ( char *token,  vector < string > *symbolTable )
 }
 
 /* Bring DFA to memory from given DFAfile */
-void constructDfa ( char filename[1024], vector < map < char, int  > > *dfa , map < int, string > *validTokenType)
+void constructDfa ( char DFAinput[1024], vector < map < char, int  > > *dfa , map < int, string > *validTokenType)
 {
 	fstream dfainput;
-	dfainput.open(filename);
+	dfainput.open(DFAinput);
 	
 	if ( dfainput.is_open() )
 	{
@@ -203,4 +214,23 @@ void constructLexeme ( char *tokenType, int index , char *lexeme )
 	strcat ( lexeme, (char*)intToStr(index).c_str() );
 	strcat ( lexeme, " > " );
 	cout<<"LEXEME:"<<lexeme<<"\n";
+}
+
+
+void createSymTabFile (  vector < string > *symbolTable )
+{
+	char symTabFile[1024];
+	strcpy ( symTabFile, SYMTAB );
+	strcat (symTabFile, "codeinput" );
+	fstream symTabPtr ;
+	symTabPtr.open(symTabFile , fstream::out | fstream::trunc );
+	if ( symTabPtr.is_open () )
+	{
+		for ( int i = 0; i < (*symbolTable).size(); i++ )
+		{
+			string entry = intToStr ( i ) + ", " + (*symbolTable)[i] + "\n";
+			symTabPtr << entry;
+		}
+		symTabPtr.close();
+	}
 }

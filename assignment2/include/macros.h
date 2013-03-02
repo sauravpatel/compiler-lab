@@ -1,5 +1,6 @@
 #define INPUT "../test/"
-#define  OUTPUT "../testOut/"
+#define  OUTPUT "../test/out."
+#define  SYMTAB "../test/symtab."
 
 //Keywords
 #define INT "int"
