@@ -11,13 +11,16 @@
 
 using namespace std;
 
-void constructDfa ( char DFAinput[1024], vector < map < char, int  > > *dfa , map < int, string > *acceptClassType);
-int tokenize ( char *token, vector < map < char,int > > dfa );
+void constructDfa ( char DFAinput[1024], vector < vector < map < char, int  > > > *dfa , vector < map < int, string > > *acceptClassType);
+pair < int, int > tokenize ( char *token, vector < vector < map < char,int > > > dfa );
 int addToSymTab ( char *token, vector < string > *symbolTable);
 void constructLexeme ( char *classType, int index ,  char *lexeme );
 void createSymTabFile (  vector < string > *symbolTable );
 
 /* convert integer to string */
+/* create full dfa (done)
+ * tokenize until accepted (now doing)
+ */
 string intToStr(int num)
 {
 	stringstream ss;
@@ -27,8 +30,8 @@ string intToStr(int num)
 
 int main()
 {
-	map < int, string > validTokenType;
-	vector < map < char, int  > > dfa;
+	vector < map < int, string > > validTokenType;
+	vector < vector < map < char, int  > > > dfa;
 	vector < string > symbolTable;
 	char DFAinput[1024];
 	strcpy (DFAinput, INPUT );
@@ -36,8 +39,8 @@ int main()
 	
 	// Reconstruct DFA
 	constructDfa ( DFAinput, &dfa , &validTokenType);
-		
-	// Now Do Lexical Analysis
+	/* Now Do Lexical Analysis */
+	//constructin input and output filenames
 	char inputSample[1024];
 	char outputSample[1024];
 	strcpy ( inputSample, INPUT );
@@ -59,25 +62,23 @@ int main()
 			char *pch = strtok( line, " \t\n");
 			while ( pch != NULL )
 			{
-				strcpy(token,pch);
 				//cout<<pch<<"\n";
-				if ( int tokenId = tokenize( token , dfa) )
+				strcpy(token,pch);
+				pair < int, int > acceptState = tokenize( token , dfa);	// return type < acceptstate, accepting DFA number >
+				//cout<<"TokenId:"<<tokenId<<" ";
+				if ( acceptState.first != -1 )
 				{
-					//cout<<"TokenId:"<<tokenId<<" ";
-					if ( tokenId != -1 )
-					{
-						// add to symbol table
-						string tokenType;
-						tokenType = validTokenType[tokenId];
-						int index = addToSymTab ( token, &symbolTable);
-						char lexeme[1024];
-						constructLexeme( (char*)tokenType.c_str() , index , lexeme );
-						codeOutput<<lexeme;
-					}
-					else
-					{
-						cout<<"Invalid token \'"<< pch << "\' found at line "<< linenumber <<"\n";
-					}
+					// add to symbol table
+					string tokenType;
+					tokenType = validTokenType[acceptState.second][acceptState.first];
+					int index = addToSymTab ( token, &symbolTable);
+					char lexeme[1024];
+					constructLexeme( (char*)tokenType.c_str() , index , lexeme );
+					codeOutput<<lexeme;
+				}
+				else
+				{
+					cout<<"Invalid token \'"<< pch << "\' found at line "<< linenumber <<"\n";
 				}
 				pch = strtok ( NULL , " \t\n" );
 			}
@@ -94,32 +95,46 @@ int main()
 /*------------End of Main----------------------*/
 
 /* Finds matching token ID ( i.e. accepting state of token ) corresponding to token
- * returns accepting state on success
- * and -1 on invalid token
+ * returns pair of  < accepting state, accepting DFAno > on success
+ * and < -1, numDFA > on invalid token
  */
-int tokenize ( char *token , vector< map < char,int > > dfa)
+pair < int, int > tokenize ( char *token , vector < vector< map < char,int > > > dfa)
 {
-	char *current = token;
-	char curinput = current[0];
-	int curState = 0;
+	pair < int, int > acceptState;
+	int numDFA = dfa.size();
+	int accept = 0;
+	int DFAno = 0;
 	int nextState;
-	while( *current++ )
+	while ( !accept && DFAno < numDFA )
 	{
-		cout<<curState<<"\t";
-		cout<<curinput<<"\t";
-		map<char,int>::iterator it = dfa.at(curState).find(curinput);
-		if ( it == dfa[curState].end() )
+		char *current = token;
+		char curinput = current[0];
+		int curState = 0;
+		while( *current++ )
 		{
-			cout<<"No transitions available.\n";
-			nextState = -1;
+			cout<<curState<<"\t";
+			cout<<curinput<<"\t";
+			map<char,int>::iterator it = dfa[DFAno].at(curState).find(curinput);
+			if ( it == dfa[DFAno][curState].end() )
+			{
+				cout<<"No transitions available in DFA "<<DFAno<<" Checking Next DFA.\n";
+				nextState = -1;
+				break;
+			}
+			nextState = it->second;
+			curState = nextState;
+			cout << nextState << "\n";
+			curinput = current[0];
+		}
+		if ( nextState != -1 )
+		{
+			accept = 1;
 			break;
 		}
-		nextState = it->second;
-		curState = nextState;
-		cout << nextState << "\n";
-		curinput = current[0];
+		DFAno++;
 	}
-	return nextState;
+	acceptState = make_pair ( nextState, DFAno );
+	return acceptState;
 }
 
 /* Add token to symbol Table */
@@ -144,39 +159,54 @@ int addToSymTab ( char *token,  vector < string > *symbolTable )
 	return index+1;
 }
 
-/* Bring DFA to memory from given DFAfile */
-void constructDfa ( char DFAinput[1024], vector < map < char, int  > > *dfa , map < int, string > *validTokenType)
+/* Bring DFA to memory from given DFAfile
+ * current delimiter for different DFA is : '!'
+ */
+void constructDfa ( char DFAinput[1024], vector < vector < map < char, int  > > > *dfa , vector < map < int, string > > *validTokenType)
 {
 	fstream dfainput;
 	dfainput.open(DFAinput);
-	
+	int DFAno = -1;	
+
 	if ( dfainput.is_open() )
 	{
 		char curState[1024], nextState[1024];
 		char line[1024];
-		int MaxState = 0;
+		int MaxState;
 		while ( dfainput.getline ( line, 1024 ) )
 		{
 			//if ( !line )
 			//	continue;
 			//cout<<"LINE:"<<line<<"\n";
-			if ( line[0] == '<' )
+			if ( line[0] == '!' )
 			{
+				DFAno++;
+				(*dfa).resize( DFAno+1 );
+				(*validTokenType).resize( DFAno+1 );
+				MaxState = 0;
 				// mapping between final state and token class
 				char state[1024];
 				char tokenType[1024];
 				char *pch;
 				pch = strtok ( line, "<,>" );
+				cout<<"Final states:\n";
 				while ( pch != NULL )
 				{
+					if ( strcmp (pch, "!") == 0 )
+					{
+						pch = strtok ( NULL, "<,>" );
+						continue;
+					}
 					strcpy (state, pch);
-					printf ( "state:%s:", state );
+					printf ( "%s  ", state );	//state
 					pch = strtok ( NULL, "<,>" );
 					strcpy (tokenType, pch);
-					printf ( "class:%s\n", tokenType );
-					(*validTokenType)[atoi(state)] = tokenType;	//add to acceptClassType
+					printf ( "%s\n", tokenType );	//accepting token type
+					(*validTokenType)[DFAno][atoi(state)] = tokenType;	//add to acceptClassType
 					pch = strtok ( NULL, "<,>" );
+					//cout<<"PCH"<<pch[0]<<"\n";
 				}
+				cout<<"Transition functions:\n";
 			}
 			else
 			{
@@ -189,28 +219,27 @@ void constructDfa ( char DFAinput[1024], vector < map < char, int  > > *dfa , ma
 					if ( MaxState < atoi(curState) + 1 )
 					{
 						MaxState = atoi(curState) +1;
-						(*dfa).resize(MaxState);
+						(*dfa)[DFAno].resize(MaxState);
 					}
-					cout<<"curstate"<<curState<<"\n";
+					cout<<"curstate : "<<curState<<"\n";
 				}
 				else
 				{
 					//transition for a state continued
 					char input[1024],nextState[1024];
 					char *pch = strtok ( line, "," );
-					cout<<"input:"<<pch<<"\t";
+					cout<<pch<<"  ";	//current input
 					strcpy ( input, pch );
 					pch = strtok ( NULL, "");
-					cout<<"nextstate:"<<pch<<"\n";
 					strcpy ( nextState, pch );
-					
+					cout<<nextState<<"\n";	//next state
 					// Resize dfa to maximum possible states
-					if ( MaxState < atoi(nextState) + 1 )
+					if ( MaxState < (atoi(nextState) + 1 ) )
 					{
 						MaxState = atoi(nextState) +1;
-						(*dfa).resize(MaxState);
+						(*dfa)[DFAno].resize(MaxState);
 					}
-					(*dfa)[atoi(curState)][input[0]] = atoi(nextState);
+					(*dfa)[DFAno][atoi(curState)][input[0]] = atoi(nextState);
 				}
 			}
 			
