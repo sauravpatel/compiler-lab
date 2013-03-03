@@ -1,2 +1,2 @@
-< ID, 1 > < ID, 2 > < ID, 3 > < NUM, 4 > < NUM, 4 > 
-< NUM, 5 > < ID, 6 > < NUM, 7 > < ID, 8 > 
+< IF, 1 > < IF, 2 > 
+< ELSE, 3 > < IF, 4 > 

@@ -51,28 +51,32 @@ int main()
 	if ( codeInput.is_open () && codeOutput.is_open() )
 	{
 		char line[1024];
+		int linenumber = 0;
 		while ( codeInput.getline(line, 1024) )
 		{
+			linenumber++;
+			char token[1024];
 			char *pch = strtok( line, " \t\n");
 			while ( pch != NULL )
 			{
+				strcpy(token,pch);
 				//cout<<pch<<"\n";
-				if ( int tokenId = tokenize( pch , dfa) )
+				if ( int tokenId = tokenize( token , dfa) )
 				{
-					cout<<"TokenId:"<<tokenId<<" ";
+					//cout<<"TokenId:"<<tokenId<<" ";
 					if ( tokenId != -1 )
 					{
 						// add to symbol table
 						string tokenType;
 						tokenType = validTokenType[tokenId];
-						int index = addToSymTab ( pch, &symbolTable);
+						int index = addToSymTab ( token, &symbolTable);
 						char lexeme[1024];
 						constructLexeme( (char*)tokenType.c_str() , index , lexeme );
 						codeOutput<<lexeme;
 					}
 					else
 					{
-						cout<<"Invalid token found.\n";
+						cout<<"Invalid token \'"<< pch << "\' found at line "<< linenumber <<"\n";
 					}
 				}
 				pch = strtok ( NULL , " \t\n" );
@@ -96,24 +100,24 @@ int main()
 int tokenize ( char *token , vector< map < char,int > > dfa)
 {
 	char *current = token;
+	char curinput = current[0];
 	int curState = 0;
 	int nextState;
-	while(*current)
+	while( *current++ )
 	{
-		cout<<"CurState: "<<curState<<" ";
-		cout<<"CurInput: "<<current[0]<<" ";
-		//nextState = getNextState ( curState, current[0] );
-		map<char,int>::iterator it = dfa[curState].find(current[0]);
+		cout<<curState<<"\t";
+		cout<<curinput<<"\t";
+		map<char,int>::iterator it = dfa.at(curState).find(curinput);
 		if ( it == dfa[curState].end() )
 		{
-			cout<<"Invalid token.\n\n";
+			cout<<"No transitions available.\n";
 			nextState = -1;
 			break;
 		}
 		nextState = it->second;
 		curState = nextState;
-		cout << "NextState: "<< nextState << "\n";
-		current++;
+		cout << nextState << "\n";
+		curinput = current[0];
 	}
 	return nextState;
 }
@@ -123,7 +127,7 @@ int addToSymTab ( char *token,  vector < string > *symbolTable )
 {
 	int index = 0;
 	int size = (*symbolTable).size();
-	cout<<"Size :"<<size;
+	//cout<<"Size :"<<size;
 	for (int i = 0; i < size; i++ )
 	{
 		if ( (*symbolTable)[i] == string( token ) ) 
@@ -148,8 +152,9 @@ void constructDfa ( char DFAinput[1024], vector < map < char, int  > > *dfa , ma
 	
 	if ( dfainput.is_open() )
 	{
-		char curstate[1024], nextstate[1024];
+		char curState[1024], nextState[1024];
 		char line[1024];
+		int MaxState = 0;
 		while ( dfainput.getline ( line, 1024 ) )
 		{
 			//if ( !line )
@@ -180,21 +185,32 @@ void constructDfa ( char DFAinput[1024], vector < map < char, int  > > *dfa , ma
 				{
 					//state changed
 					char *pch = strtok ( line, "#,:" );
-					strcpy( curstate, pch );
-					(*dfa).resize(atoi(curstate)+1);
-					cout<<"curstate"<<curstate<<"\n";
+					strcpy( curState, pch );
+					if ( MaxState < atoi(curState) + 1 )
+					{
+						MaxState = atoi(curState) +1;
+						(*dfa).resize(MaxState);
+					}
+					cout<<"curstate"<<curState<<"\n";
 				}
 				else
 				{
 					//transition for a state continued
-					char input[1024],nextstate[1024];
+					char input[1024],nextState[1024];
 					char *pch = strtok ( line, "," );
 					cout<<"input:"<<pch<<"\t";
 					strcpy ( input, pch );
 					pch = strtok ( NULL, "");
 					cout<<"nextstate:"<<pch<<"\n";
-					strcpy ( nextstate, pch );
-					(*dfa)[atoi(curstate)][input[0]] = atoi(nextstate);
+					strcpy ( nextState, pch );
+					
+					// Resize dfa to maximum possible states
+					if ( MaxState < atoi(nextState) + 1 )
+					{
+						MaxState = atoi(nextState) +1;
+						(*dfa).resize(MaxState);
+					}
+					(*dfa)[atoi(curState)][input[0]] = atoi(nextState);
 				}
 			}
 			
