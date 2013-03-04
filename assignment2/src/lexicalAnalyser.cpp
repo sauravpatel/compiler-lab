@@ -52,6 +52,7 @@ int main()
 	codeInput.open(inputSample);
 	codeOutput.open(outputSample, fstream::out | fstream::trunc );
 	char curInput;
+	
 	if ( codeInput.is_open () && codeOutput.is_open() )
 	{
 		char line[LINESIZE];
@@ -187,7 +188,7 @@ void constructDfa ( char DFAinput[1024], vector < vector < map < char, int  > > 
 			//if ( !line )
 			//	continue;
 			//cout<<"LINE:"<<line<<"\n";
-			if ( line[0] == '!' )
+			if ( line[0] == '<' )	//replace '<' with '!' for running multiple DFAs
 			{
 				DFAno++;
 				(*dfa).resize( DFAno+1 );
@@ -201,11 +202,12 @@ void constructDfa ( char DFAinput[1024], vector < vector < map < char, int  > > 
 				//cout<<"Final states:\n";
 				while ( pch != NULL )
 				{
+					/*uncomment this for running multiple DFAs
 					if ( strcmp (pch, "!") == 0 )
 					{
 						pch = strtok ( NULL, "<,>" );
 						continue;
-					}
+					}*/
 					strcpy (state, pch);
 					//printf ( "%s  ", state );	//state
 					pch = strtok ( NULL, "<,>" );
@@ -264,7 +266,7 @@ void constructLexeme ( char *tokenType, char *lexeme, vector < string > *symbolT
 {
 	strcpy ( lexeme, "< " );
 	strcat (lexeme, tokenType );
-	if ( strcmp ( tokenType, "ID" ) == 0 )
+	if ( strcmp ( tokenType, "ID" ) == 0 || strcmp (tokenType, "CONSTANT" ) == 0)
 	{
 		int index = addToSymTab ( token, symbolTable);
 		strcat ( lexeme, ", " );

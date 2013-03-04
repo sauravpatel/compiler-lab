@@ -1,2 +1,11 @@
-< IF > < PLUS > < ID, 1 > < WHILE > < ID, 2 > < ID, 3 > < DIV > < WHILE > 
-< COMMENT > < ID, 4 > < DIGIT > < MINUS > < DIGIT > 
+< VOID > < ID, 1 > < LBRACE > 
+< ID, 2 > < RBRACE > < INC > < PLUS > < RPAREN > 
+< BREAK > < CONSTANT, 3 > < CONSTANT, 4 > < MINUS > 
+
+
+< ID, 5 > 
+< ID, 6 > < ID, 7 > 
+< CHAR > < ID, 8 > < ASSIGN > < INT > < ID, 9 > < MULT > < ID, 10 > < PLUS > < MINUS > < DIV > 
+
+< CONT > 
+< COMMENT > < COMMENT > 
