@@ -1,3 +1,2 @@
-< IF, 1 > < IF, 2 > 
-< ELSE, 3 > < IF, 4 > < NUM, 5 > 
-< ID, 6 > < ID, 7 > < ID, 8 > < NUM, 9 > 
+< IF > < PLUS > < ID, 1 > < WHILE > < ID, 2 > < ID, 3 > < DIV > < WHILE > 
+< COMMENT > < ID, 4 > < DIGIT > < MINUS > < DIGIT > 

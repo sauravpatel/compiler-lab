@@ -1,9 +1,4 @@
-0, if
-1, if
-2, else
-3, if
-4, 2111
-5, a
-6, ab
-7, aaaaaaaaaaa
-8, 222222
+0, else
+1, division
+2, array
+3, aasd

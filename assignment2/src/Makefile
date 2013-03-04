@@ -1,2 +1,2 @@
 all:
-	g++ -w lexicalAnalyser.cpp
+	g++ -w DFAtoMinDFA.cpp
