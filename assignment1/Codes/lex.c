@@ -24,9 +24,10 @@ int lex(void){
          */
 
          current = input_buffer;
+         printf("enter expression:\n");
          if(!gets(input_buffer)){
             *current = '\0' ;
-
+			printf("EOI\n");
             return EOI;
          }
          ++yylineno;
@@ -61,7 +62,11 @@ int lex(void){
                fprintf(stderr, "Agvonse la8emevn eisagwgn <%c>\n", *current);
             else{
                while(isalnum(*current))
+               {
+				   printf("alphanum\n");
                   ++current;
+			  }
+			  printf("\n");
                yyleng = current - yytext;
                return NUM_OR_ID;
             }
@@ -77,16 +82,15 @@ static int Lookahead = -1; /* Lookahead token  */
 int match(int token){
    /* Return true if "token" matches the
       current lookahead symbol.                */
-
+	//printf("In match\n");
    if(Lookahead == -1)
       Lookahead = lex();
-
+	//printf("going out of match\n");
    return token == Lookahead;
 }
 
 void advance(void){
 /* Advance the lookahead to the next
    input symbol.                               */
-
-    Lookahead = lex();
+	Lookahead = lex();
 }

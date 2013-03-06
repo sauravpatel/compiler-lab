@@ -77,8 +77,7 @@ void    factor()
 #define MAXFIRST 16
 #define SYNCH	 SEMI
 
-int	legal_lookahead(  first_arg )
-int	first_arg;
+int	legal_lookahead(  int first_arg, ...)
 {
     /* Simple error detection and recovery. Arguments are a 0-terminated list of
      * those tokens that can legitimately come next in the input. If the list is
