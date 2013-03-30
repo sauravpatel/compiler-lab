@@ -1,0 +1,21 @@
+begin
+	begin
+		if 2<6 then
+			begin
+				2+3;
+				while a<3 do
+					begin
+						a:=2;
+						a+1;
+					end
+			end
+		while a>5 do
+			if (c+9)>5 then
+				2+3;
+	end
+end
+
+begin
+end
+
+a:=(8+3)*Z+6+05;
