@@ -1,0 +1,8 @@
+cheer asahiSuperDry brahma daru coorsLight
+START BEER DRINK
+START-->BEER cheer
+START-->DRINK BEER
+BEER-->asahiSuperDry brahma
+BEER-->coorsLight START
+DRINK-->daru
+DRINK-->epsilon
