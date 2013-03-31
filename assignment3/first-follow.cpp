@@ -48,6 +48,7 @@ int main( int argc, char** argv )
   int lineNumber=0;  // For error reporting during reading input grammar file
   fstream readGrammar, outputfile;
   string line="";
+  string start="";  // For start symbol
   vector< list< string > > prodRules;  // First entry is LHS and rest is part of RHS in a list
 
   readGrammar.open( argv[1] );
@@ -73,8 +74,11 @@ int main( int argc, char** argv )
     if( getline( readGrammar, line ) ){
       lineNumber++;
       string nonTerminal;
-      istringstream iss( line );
       cout << "List of all Non-terminals are: ";
+      istringstream iss( line );
+      iss >> start;  // first non terminal should be start symbol
+      nonTerms.insert( start );
+      cout << start << ", ";
       while( iss ){
 	iss >> nonTerminal;
 	cout << nonTerminal << ", ";
@@ -144,7 +148,7 @@ int main( int argc, char** argv )
 
    // Generate first set of all non terminals
    //int loopNo = 1;
-   bool change = true;
+   bool change = true;  //keep repeating until there is no change in first set
    while( change ){
      //cout << "Loop Number : " << loopNo++ << endl;
      change = false;
@@ -191,6 +195,84 @@ int main( int argc, char** argv )
      cout << it->first <<" : ";
      printSet( it->second );
    }
+   cout << "####################### end of first set generation ##########################\n\n";
 
-   // Now generate follow sets
+
+  // Now generate follow sets
+  #define DOLLAR "$" // dollar
+  map< string, set< string > > NTFollower;
+  followSet[ start ].insert( DOLLAR );
+  change = true;
+  int loopNo = 1;
+  while( change ){
+    cout << "LOOP NO : " << loopNo++ << endl;
+    change = false;
+    for( vector< list< string > >::iterator itOneRule = prodRules.begin(); itOneRule != prodRules.end(); itOneRule++ ){
+      list< string > oneRule = *itOneRule;
+      string LHS = oneRule.front();
+      oneRule.pop_front();
+      oneRule.reverse();  // Reversing list ordering ( could also have gone for reverse iterator )
+      string mostRHS = oneRule.front();
+      if( nonTerms.find( mostRHS ) != nonTerms.end() )
+        NTFollower[ mostRHS ].insert( LHS );  // it means add follow(LHS) to follow(mostRHS)
+      oneRule.pop_front();
+      for( list< string >::iterator itRHS = oneRule.begin(); itRHS != oneRule.end(); itRHS++ ){
+        // for each non terminals in the RHS of production rules
+        unsigned prevSize = followSet[ *itRHS ].size();
+        cout << *itRHS<<" : ";
+        for( set< string >::iterator itfirstSet = firstSet[ mostRHS ].begin(); itfirstSet != firstSet[ mostRHS ].end(); itfirstSet++ ){
+          followSet[ *itRHS ].insert( *itfirstSet );
+          cout<<*itfirstSet<< "  ";
+        }
+	if( followSet[ *itRHS ].size() != prevSize ){
+	  change =true;
+	}
+        cout<<endl;
+        if( firstSet[ mostRHS ].find( "epsilon" ) != firstSet[ mostRHS ].end() ){
+	  unsigned oldSize = NTFollower[ *itRHS ].size();
+          NTFollower[ *itRHS ].insert( mostRHS );
+	  if( NTFollower[ *itRHS ].size() != oldSize ){
+	    cout << "here" <<endl;
+	    change = true;
+	  }
+        }
+        mostRHS = *itRHS;
+      }
+    }
+  }
+  // The above code within the while loop is not perfect.
+  // There are some major checks to be done whin i will work with another example.
+
+  // Merging all the NTFollower sets
+  change = true;
+  while( change ){
+    change = false;
+    for( map< string, set< string > >::iterator itNT = NTFollower.begin(); itNT != NTFollower.end(); itNT++ ){
+      unsigned prevSize = followSet[ itNT->first ].size();
+      for( set< string >::iterator itfollowerset = itNT->second.begin(); itfollowerset != itNT->second.end(); itfollowerset++ ){
+        for( set< string >::iterator itTerms = followSet[ *itfollowerset ].begin(); itTerms != followSet[*itfollowerset ].end(); itTerms++ ){
+	  followSet[ itNT->first ].insert( *itTerms );
+	}
+      }
+      if( followSet[ itNT->first ].size() != prevSize ){
+        change = true;
+      }
+    }
+  }
+
+  // Removing epsilon from follow sets
+  for( map< string, set< string > >::iterator it = followSet.begin(); it  != followSet.end(); it++ ){
+    if( it->second.find( "epsilon" ) != it->second.end() )
+      it->second.erase( it->second.find( "epsilon" ) );
+  }
+
+  // Print all follow sets
+  cout << "List of follow sets :\n";
+  for( map< string, set< string > >::iterator it = followSet.begin(); it  != followSet.end(); it++ ){
+    cout << it->first <<" : ";
+    for( set< string >::iterator itList = it->second.begin(); itList != it->second.end(); itList++ ){
+      cout << *itList << ", ";
+    }
+    cout << endl;
+  }
 }

@@ -1,0 +1,7 @@
+c e g s d f
+A B C D F
+A-->B c D F g
+B-->s
+D-->d
+F-->f
+F-->epsilon
