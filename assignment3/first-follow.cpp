@@ -39,8 +39,8 @@ void printSet( set< string > myset ){
 
 int main( int argc, char** argv )
 {
-  if( argc < 3 ){
-    cout << "Usage: ./program_name inputGrammar_File Output_file\n";
+  if( argc != 2 ){
+    cout << "Usage: ./program_name inputGrammar_File\n";
     exit(0);
   }
 
@@ -189,12 +189,31 @@ int main( int argc, char** argv )
        }
      }
    }
-   //printing first set
-   cout << "\nAll first sets are:\n";
-   for ( map< string, set< string > >::iterator it = firstSet.begin(); it != firstSet.end(); it++ ){
-     cout << it->first <<" : ";
-     printSet( it->second );
+   //printing first set and writing in file input.first
+   string outFirst = string( argv[1] ) + ".first";
+   fstream outFirstFile;
+   outFirstFile.open( outFirst.c_str(), fstream::out );
+   if( outFirstFile.is_open() ){
+     cout << "\nAll first sets are:\n";
+     for( map< string, set< string > >::iterator it = firstSet.begin(); it  != firstSet.end(); it++ ){
+       string LHS = it->first;
+       cout << LHS << " : ";
+       string oneFirstSet = LHS; 
+       for( set< string >::iterator itList = it->second.begin(); itList != it->second.end(); itList++ ){
+         cout << *itList << ", ";
+	 oneFirstSet += " " + *itList;
+       }
+       cout << endl;
+       oneFirstSet += "\n";
+       outFirstFile << oneFirstSet;
+     }
+     outFirstFile.close();
    }
+   else{
+     cout << "Unable to open output first file.\n";
+     exit(0);
+   }
+
    cout << "####################### end of first set generation ##########################\n\n";
 
 
@@ -203,9 +222,9 @@ int main( int argc, char** argv )
   map< string, set< string > > NTFollower;
   followSet[ start ].insert( DOLLAR );
   change = true;
-  int loopNo = 1;
+  //int loopNo = 1;
   while( change ){
-    cout << "LOOP NO : " << loopNo++ << endl;
+    //cout << "LOOP NO : " << loopNo++ << endl;
     change = false;
     for( vector< list< string > >::iterator itOneRule = prodRules.begin(); itOneRule != prodRules.end(); itOneRule++ ){
       list< string > oneRule = *itOneRule;
@@ -219,20 +238,19 @@ int main( int argc, char** argv )
       for( list< string >::iterator itRHS = oneRule.begin(); itRHS != oneRule.end(); itRHS++ ){
         // for each non terminals in the RHS of production rules
         unsigned prevSize = followSet[ *itRHS ].size();
-        cout << *itRHS<<" : ";
+        //cout << *itRHS<<" : ";
         for( set< string >::iterator itfirstSet = firstSet[ mostRHS ].begin(); itfirstSet != firstSet[ mostRHS ].end(); itfirstSet++ ){
           followSet[ *itRHS ].insert( *itfirstSet );
-          cout<<*itfirstSet<< "  ";
+          //cout<<*itfirstSet<< "  ";
         }
 	if( followSet[ *itRHS ].size() != prevSize ){
 	  change =true;
 	}
-        cout<<endl;
+        //cout<<endl;
         if( firstSet[ mostRHS ].find( "epsilon" ) != firstSet[ mostRHS ].end() ){
 	  unsigned oldSize = NTFollower[ *itRHS ].size();
           NTFollower[ *itRHS ].insert( mostRHS );
 	  if( NTFollower[ *itRHS ].size() != oldSize ){
-	    cout << "here" <<endl;
 	    change = true;
 	  }
         }
@@ -266,13 +284,29 @@ int main( int argc, char** argv )
       it->second.erase( it->second.find( "epsilon" ) );
   }
 
-  // Print all follow sets
+  //printing follow set and writing in file input.follow
   cout << "List of follow sets :\n";
-  for( map< string, set< string > >::iterator it = followSet.begin(); it  != followSet.end(); it++ ){
-    cout << it->first <<" : ";
-    for( set< string >::iterator itList = it->second.begin(); itList != it->second.end(); itList++ ){
-      cout << *itList << ", ";
-    }
-    cout << endl;
-  }
+  string outFollow = string( argv[1] ) + ".follow";
+  fstream outFollowFile;
+  outFollowFile.open( outFollow.c_str(), fstream::out );
+   if( outFollowFile.is_open() ){
+     cout << "\nAll first sets are:\n";
+     for( map< string, set< string > >::iterator it = followSet.begin(); it  != followSet.end(); it++ ){
+       string LHS = it->first;
+       cout << LHS << " : ";
+       string oneFollowSet = LHS; 
+       for( set< string >::iterator itList = it->second.begin(); itList != it->second.end(); itList++ ){
+         cout << *itList << ", ";
+	 oneFollowSet += " " + *itList;
+       }
+       cout << endl;
+       oneFollowSet += "\n";
+       outFollowFile << oneFollowSet;
+     }
+     outFollowFile.close();
+   }
+   else{
+     cout << "Unable to open output follow file.\n";
+     exit(0);
+   }
 }
