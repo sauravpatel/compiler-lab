@@ -1,0 +1,12 @@
+* *
++ +
+- -
+/ /
+E id num
+E' + - epsilon
+F id num
+T id num
+T' * / epsilon
+epsilon epsilon
+id id
+num num

@@ -1,0 +1,11 @@
+a b c t f $ r s
+E T A B
+A-->A r
+    |A s
+B-->C s
+C-->A t
+E-->E a
+   |E b
+   |E c
+   |d c
+   |f E t
