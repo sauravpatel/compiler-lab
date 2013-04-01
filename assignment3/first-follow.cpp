@@ -7,11 +7,11 @@
 /**************************************
 * Input file format:
 * first line contains list of terminals
-* second line contains list of all non-Terminals
+* second line contains list of all non-Terminals ( first symbol is START symbol )
 * Rest file contains production rules
 * Each line emust contaion only one production rule
 * For example if you have rule like : (A-->bB | d), the it should be written as
-* (A-->bB)
+* (A-->b B)
 * (A-->d), in two seperate lines
 **************************************/
 
@@ -58,13 +58,13 @@ int main( int argc, char** argv )
       lineNumber++;
       string terminal;
       istringstream iss( line );
-      cout << "List of all Terminals are: ";
+      //cout << "List of all Terminals are: ";
       while( iss ){
 	iss >> terminal;
-	cout << terminal << ", ";
+	//cout << terminal << ", ";
 	terms.insert( terminal );
       }
-      cout<<endl;
+      //cout<<endl;
       terms.insert( "epsilon" );  // epsilon is a terminal
     }
     else{
@@ -74,17 +74,17 @@ int main( int argc, char** argv )
     if( getline( readGrammar, line ) ){
       lineNumber++;
       string nonTerminal;
-      cout << "List of all Non-terminals are: ";
+      //cout << "List of all Non-terminals are: ";
       istringstream iss( line );
       iss >> start;  // first non terminal should be start symbol
       nonTerms.insert( start );
-      cout << start << ", ";
+      //cout << start << ", ";
       while( iss ){
 	iss >> nonTerminal;
-	cout << nonTerminal << ", ";
+	//cout << nonTerminal << ", ";
 	nonTerms.insert( nonTerminal );
       }
-      cout<<endl;
+      //cout<<endl;
     }
     else{
       cout << "Missing list of non terminals from file. Please give input file in corect format." << endl;
@@ -92,7 +92,7 @@ int main( int argc, char** argv )
     }
 
     /* Now comes the time for reading production rules */
-    cout << "Production rules are:" << endl;
+    //cout << "Production rules are:" << endl;
     while( getline( readGrammar, line ) ){
       lineNumber++;
       list< string > oneRule;
@@ -111,9 +111,9 @@ int main( int argc, char** argv )
 	}
 	oneRule.pop_back();
         // Print rules as in vector prodRules
-        for (list< string >::iterator it=oneRule.begin(); it != oneRule.end(); ++it)
-          cout << ' ' << *it;
-	cout << endl;
+        //for (list< string >::iterator it=oneRule.begin(); it != oneRule.end(); ++it)
+          //cout << ' ' << *it;
+	//cout << endl;
 	if( oneRule.size() != 1 ){
 	  prodRules.push_back( oneRule );
 	}
@@ -194,16 +194,16 @@ int main( int argc, char** argv )
    fstream outFirstFile;
    outFirstFile.open( outFirst.c_str(), fstream::out );
    if( outFirstFile.is_open() ){
-     cout << "\nAll first sets are:\n";
+     //cout << "\nAll first sets are:\n";
      for( map< string, set< string > >::iterator it = firstSet.begin(); it  != firstSet.end(); it++ ){
        string LHS = it->first;
-       cout << LHS << " : ";
+       //cout << LHS << " : ";
        string oneFirstSet = LHS; 
        for( set< string >::iterator itList = it->second.begin(); itList != it->second.end(); itList++ ){
-         cout << *itList << ", ";
+         //cout << *itList << ", ";
 	 oneFirstSet += " " + *itList;
        }
-       cout << endl;
+       //cout << endl;
        oneFirstSet += "\n";
        outFirstFile << oneFirstSet;
      }
@@ -214,7 +214,7 @@ int main( int argc, char** argv )
      exit(0);
    }
 
-   cout << "####################### end of first set generation ##########################\n\n";
+   //cout << "####################### end of first set generation ##########################\n\n";
 
 
   // Now generate follow sets
@@ -285,21 +285,21 @@ int main( int argc, char** argv )
   }
 
   //printing follow set and writing in file input.follow
-  cout << "List of follow sets :\n";
+  //cout << "List of follow sets :\n";
   string outFollow = string( argv[1] ) + ".follow";
   fstream outFollowFile;
   outFollowFile.open( outFollow.c_str(), fstream::out );
    if( outFollowFile.is_open() ){
-     cout << "\nAll first sets are:\n";
+     //cout << "\nAll follow sets are:\n";
      for( map< string, set< string > >::iterator it = followSet.begin(); it  != followSet.end(); it++ ){
        string LHS = it->first;
-       cout << LHS << " : ";
+       //cout << LHS << " : ";
        string oneFollowSet = LHS; 
        for( set< string >::iterator itList = it->second.begin(); itList != it->second.end(); itList++ ){
-         cout << *itList << ", ";
+         //cout << *itList << ", ";
 	 oneFollowSet += " " + *itList;
        }
-       cout << endl;
+       //cout << endl;
        oneFollowSet += "\n";
        outFollowFile << oneFollowSet;
      }
@@ -309,4 +309,5 @@ int main( int argc, char** argv )
      cout << "Unable to open output follow file.\n";
      exit(0);
    }
+   cout << "First Follow sets generated.\n";
 }
