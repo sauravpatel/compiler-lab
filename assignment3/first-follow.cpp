@@ -55,14 +55,16 @@ int main( int argc, char** argv )
   if( readGrammar.is_open() ){
     /* Get Terminals and non-Terminals list from first two lines */
     if( getline( readGrammar, line ) ){
+        if( line.empty() )
+            continue;
       lineNumber++;
       string terminal;
       istringstream iss( line );
       //cout << "List of all Terminals are: ";
       while( iss ){
-	iss >> terminal;
-	//cout << terminal << ", ";
-	terms.insert( terminal );
+	    iss >> terminal;
+	    //cout << terminal << ", ";
+	    terms.insert( terminal );
       }
       //cout<<endl;
       terms.insert( "epsilon" );  // epsilon is a terminal

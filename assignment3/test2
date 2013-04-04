@@ -1,0 +1,8 @@
+$ a b c
+S X Y W
+S-->W Y
+X-->W c
+    |epsilon
+W-->X b
+Y-->Y a
+    |epsilon

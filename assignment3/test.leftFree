@@ -1,0 +1,18 @@
+$ a b c epsilon f r s t 
+A B C D E T 
+A-->C s A1 
+A1-->r A1  
+	|s A1  
+	|epsilon 
+B-->C s 
+C-->D f C1 
+C1-->s A1 t C1  
+	|epsilon 
+D1-->f C1 s A1 t D1  
+	|epsilon 
+E-->d c E1  
+	|f E t E1 
+E1-->a E1  
+	|b E1  
+	|c E1  
+	|epsilon 

@@ -1,9 +1,12 @@
 a b c t f $ r s
-E T A B
+E T A B C D
 A-->A r
     |A s
+    |C s
 B-->C s
 C-->A t
+    |D f
+D-->A t
 E-->E a
    |E b
    |E c

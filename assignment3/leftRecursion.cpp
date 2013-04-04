@@ -62,8 +62,12 @@ map< string, vector< vector< string > > > immediateLeft( string LHS, vector< vec
   else{
     string newLHS = LHS + '1';
     for( vector< vector< string > >::iterator itnonRecur = nonRecursive.begin(); itnonRecur != nonRecursive.end(); itnonRecur++ ){
-      (*itnonRecur).push_back( newLHS );
       //cout << "non recurrent " << (*itnonRecur)[0] << endl;
+      // A-->A t | b | epsilon, then instead of A-->epsilon A1 | b A1 and A1-->epsilon | t A1, we need A-->A1 | b A1 and A1-->epsilon | t A1
+      // basically, preventing epsilon to occur as first terminal of any RHS
+      if( (*itnonRecur)[0] == "epsilon" )
+          (*itnonRecur).clear();
+      (*itnonRecur).push_back( newLHS );
       newRule.push_back( *itnonRecur );
     }
     if( newRule.size() != 0 )
@@ -85,9 +89,9 @@ map< string, vector< vector< string > > > immediateLeft( string LHS, vector< vec
 
 int main( int argc, char **argv )
 {
-  if( argc != 2 ){
+  if( argc < 2  ){
     cout << "Invalid Usage:\n";
-    cout << "./program inputGrammar\n";
+    cout << "./program inputGrammariFileame outputFilename( optional )\n";
     exit(0);
   }
   set <string> terms, nonTerms;
@@ -104,13 +108,13 @@ int main( int argc, char **argv )
       lineNumber++;
       string terminal;
       istringstream iss( line );
-      cout << "List of all Terminals are: ";
+      //cout << "List of all Terminals are: ";
       while( iss ){
 	iss >> terminal;
-	cout << terminal << ", ";
+	//cout << terminal << ", ";
 	terms.insert( terminal );
       }
-      cout<<endl;
+      //cout<<endl;
       terms.insert( "epsilon" );  // epsilon is a terminal
     }
     else{
@@ -120,17 +124,17 @@ int main( int argc, char **argv )
     if( getline( readGrammar, line ) ){
       lineNumber++;
       string nonTerminal;
-      cout << "List of all Non-terminals are: ";
+      //cout << "List of all Non-terminals are: ";
       istringstream iss( line );
       iss >> start;  // first non terminal should be start symbol
       nonTerms.insert( start );
-      cout << start << ", ";
+      //cout << start << ", ";
       while( iss ){
 	iss >> nonTerminal;
-	cout << nonTerminal << ", ";
+	//cout << nonTerminal << ", ";
 	nonTerms.insert( nonTerminal );
       }
-      cout<<endl;
+      //cout<<endl;
     }
     else{
       cout << "Missing list of non terminals from file. Please give input file in corect format." << endl;
@@ -193,22 +197,97 @@ int main( int argc, char **argv )
 
   // Now the production rules are in memory
 
-  for( map< string, vector< vector< string > > >::iterator itProdRules = prodRules.begin(); itProdRules != prodRules.end(); itProdRules++ ){
+  /*for( map< string, vector< vector< string > > >::iterator itProdRules = prodRules.begin(); itProdRules != prodRules.end(); itProdRules++ ){
     map< string, vector< vector< string > > > newProdRules;
     newProdRules = immediateLeft( itProdRules->first, itProdRules->second );
     prodRules.erase( itProdRules->first );
     for( map< string, vector< vector< string > > >::iterator itnewProdRules = newProdRules.begin(); itnewProdRules != newProdRules.end(); itnewProdRules++ ){
       prodRules[ itnewProdRules->first ] = itnewProdRules->second;
     }
-  }
+  }*/
 
   // grammar must be without epsilon-production and without cycles
-  unsigned numNonTerms = prodRules.size();
+  //int loop=0;
+  //unsigned numNonTerms = prodRules.size();
+  //for i := 1 to n do
+
   for( map< string, vector< vector< string > > >::iterator iti= prodRules.begin(); iti!= prodRules.end(); iti++ ){
+      //for j := 1 to i − 1 do
     for( map< string, vector< vector< string > > >::iterator itj = prodRules.begin(); itj != iti; itj++ ){
-      
+        //Let Aj → δ1 | · · · | δm be all the current Aj -productions.
+      for( vector< vector< string > >::iterator itOneRule = iti->second.begin(); itOneRule != iti->second.end(); itOneRule++ ){
+          //for each production Ai → Aj γ
+          if( (*itOneRule)[0] == itj->first ){
+              // pop vector containing itj->first
+              vector< string > AY = *itOneRule;
+              //cout << AY[0] << " : " << AY [1]<<endl;
+              prodRules[ iti->first ].erase( itOneRule );
+              // extract Y and store
+              AY.erase( AY.begin() );
+              vector< string > Y = AY;
+              // replace Ai --> Aj Y by Ai → δ1 γ | · · · | δm γ.
+              for( vector< vector< string > >::iterator it = prodRules[ itj->first ].begin(); it != prodRules[ itj->first ].end(); it++ ){
+                  vector< string > newRule;
+                  newRule = *it;
+                  if( newRule[0] == "epsilon" ){
+                      newRule.clear();
+                  }
+                  for( vector< string >::iterator itY = Y.begin(); itY != Y.end(); itY++ ){
+                      newRule.push_back( *itY );
+                  }
+                  prodRules[ iti->first ].push_back( newRule );
+              }
+          }
+      }
+    }
+    // Eliminate the immediate left recursion from Ai -productions, use A−i .
+    // eliminate immediate left recursion
+    map< string, vector< vector< string > > > newProdRules;
+    newProdRules = immediateLeft( iti->first, iti->second );
+    prodRules.erase( iti->first );
+    for( map< string, vector< vector< string > > >::iterator itnewProdRules = newProdRules.begin(); itnewProdRules != newProdRules.end(); itnewProdRules++ ){
+      prodRules[ itnewProdRules->first ] = itnewProdRules->second;
+      // adding NEW non Terminals to list of non Terminals 
+      if( nonTerms.find( itnewProdRules->first ) == nonTerms.end() )
+          nonTerms.insert( itnewProdRules->first );
     }
   }
-
-  printProdRules( prodRules );
+  //printProdRules( prodRules );
+  //checking if output file name is provided
+  string leftFreeFile;
+  if( argc == 3 )
+      leftFreeFile = string( argv[1] );
+  else
+      leftFreeFile = string( argv[1] ) + ".leftFree";
+  fstream ofptr;
+  ofptr.open( leftFreeFile.c_str(), fstream::out );
+  if( ofptr.is_open() ){
+      //write list of terminals
+      for( set< string >::iterator itTerms = terms.begin(); itTerms != terms.end(); itTerms++ ){
+          // not printing epsilon in terminals list only for the shake of amogh's implementation of parseing table generation
+          if( *itTerms != "epsilon" )
+            ofptr << *itTerms << " ";
+      }
+      ofptr << endl;
+      //write list of non terminals
+      for( set< string >::iterator itNonTerms = nonTerms.begin(); itNonTerms != nonTerms.end(); itNonTerms++ )
+          ofptr << *itNonTerms << " ";
+      ofptr << endl;
+      //write left recursion free grammar to file
+    for( map< string, vector< vector< string > > >::iterator itNonTerm = prodRules.begin(); itNonTerm != prodRules.end(); itNonTerm++ ){
+      for( vector< vector< string > >::iterator itOneRule = itNonTerm->second.begin(); itOneRule != itNonTerm->second.end(); itOneRule++ ){
+        ofptr << itNonTerm->first << "-->";
+        for( vector< string >::iterator it=(*itOneRule).begin(); it != (*itOneRule).end(); ++it)
+          ofptr << *it << " ";
+        if( itOneRule+1 != itNonTerm->second.end() )
+            ofptr << " \n";
+      }
+      ofptr << endl;
+    }
+  }
+  else{
+      cout << "Unable to open output file.\n";
+      exit(0);
+  }
+  cout << "Left Recursion Removed Successfully.\nNew grammar is stored in " << leftFreeFile << "\n";
 }

@@ -1,0 +1,10 @@
+$ a b c 
+S W X X1 Y Y1 
+S-->W Y 
+W-->X b 
+X-->X1 
+X1-->b c X1  
+X1-->epsilon 
+Y-->Y1 
+Y1-->a Y1  
+Y1-->epsilon 
