@@ -55,8 +55,6 @@ int main( int argc, char** argv )
   if( readGrammar.is_open() ){
     /* Get Terminals and non-Terminals list from first two lines */
     if( getline( readGrammar, line ) ){
-        if( line.empty() )
-            continue;
       lineNumber++;
       string terminal;
       istringstream iss( line );
@@ -96,6 +94,8 @@ int main( int argc, char** argv )
     /* Now comes the time for reading production rules */
     //cout << "Production rules are:" << endl;
     while( getline( readGrammar, line ) ){
+      if( line.empty() )
+          continue;
       lineNumber++;
       list< string > oneRule;
       unsigned pos = line.find( "-->" );

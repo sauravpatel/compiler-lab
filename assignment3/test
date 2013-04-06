@@ -1,14 +1,16 @@
-a b c t f $ r s
-E T A B C D
-A-->A r
-    |A s
-    |C s
-B-->C s
-C-->A t
-    |D f
-D-->A t
-E-->E a
-   |E b
-   |E c
-   |d c
-   |f E t
+$ a b c f r s t 
+A A1 B C D E E1 
+A-->C s A1 
+A1-->r A1  
+A1-->s A1  
+A1-->epsilon 
+B-->C s 
+C-->A t  
+C-->D f 
+D-->A t 
+E-->d c E1  
+E-->f E t E1 
+E1-->a E1  
+E1-->b E1  
+E1-->c E1  
+E1-->epsilon 

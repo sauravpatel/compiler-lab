@@ -1,0 +1,13 @@
+* + - / id num $
+EE E' F T T' 
+E-->T E' 
+E'-->+ T E'  
+E'-->- T E'  
+E'-->epsilon 
+F-->num  
+F-->id  
+F-->T id 
+T-->F T' 
+T'-->* F T'  
+T'-->/ F T'  
+T'-->epsilon 
